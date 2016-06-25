@@ -1,0 +1,85 @@
+﻿<Window x:Class="BD2.Views.EditList"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:ei="clr-namespace:Microsoft.Expression.Interactivity.Core;assembly=Microsoft.Expression.Interactions"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:local="clr-namespace:BD2.Views"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        Title="Edytuj dane osoby"
+        Width="250.119"
+        Height="420"
+        WindowStartupLocation="CenterOwner"
+        mc:Ignorable="d">
+    <Grid>
+        <Label Margin="20,5,0,0"
+               HorizontalAlignment="Left"
+               VerticalAlignment="Top"
+               Content="Nazwa:" />
+        <Label Margin="20,67,0,0"
+               HorizontalAlignment="Left"
+               VerticalAlignment="Top"
+               Content="Data urodzenia:" />
+        <Label Margin="20,129,0,0"
+               HorizontalAlignment="Left"
+               VerticalAlignment="Top"
+               Content="Data śmierci:" />
+        <Label Margin="20,191,0,0"
+               HorizontalAlignment="Left"
+               VerticalAlignment="Top"
+               Content="Płeć:" />
+        <TextBox Width="202"
+                 Height="23"
+                 Margin="20,36,0,0"
+                 HorizontalAlignment="Left"
+                 VerticalAlignment="Top"
+                 Text="{Binding Name}"
+                 TextWrapping="Wrap" />
+        <DatePicker Width="202"
+                 Height="23"
+                 Margin="20,98,0,0"
+                 HorizontalAlignment="Left"
+                 VerticalAlignment="Top"                  
+                 SelectedDate="{Binding DayOfBirth}" />
+        <DatePicker Width="202"
+                 Height="23"
+                 Margin="20,160,0,0"
+                 HorizontalAlignment="Left"
+                 VerticalAlignment="Top"
+                 SelectedDate="{Binding DayOfDeath}" />
+        <ComboBox Width="202"
+                 Height="23"
+                 Margin="20,222,0,0"
+                 HorizontalAlignment="Left"
+                 VerticalAlignment="Top"
+                 SelectedValue="{Binding Gender, Mode=TwoWay}"
+                 ItemsSource="{Binding Genders}" />
+        <Button Width="75"
+                Margin="147,350,0,0"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Content="Anuluj"
+                Style="{DynamicResource AccentedSquareButtonStyle}">
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="Click">
+                    <ei:CallMethodAction MethodName="Close" TargetObject="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Window}, AncestorLevel=1}}" />
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+        </Button>
+        <Button Width="75"
+                Margin="60,350,0,0"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Content="Edytuj"
+                Command="{Binding SaveCommand}"
+                Style="{DynamicResource AccentedSquareButtonStyle}" >
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="Click">
+                    <ei:CallMethodAction MethodName="Close" TargetObject="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Window}, AncestorLevel=1}}" />
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+        </Button>
+
+
+    </Grid>
+</Window>
