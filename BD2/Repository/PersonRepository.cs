@@ -7,11 +7,11 @@ using BD2.ViewModels;
 
 namespace BD2.Repository
 {
-    public class ElementRepository
+    public class PersonRepository
     {
-        static string _path = @"C:\Users\jasiek\Desktop\Bazy Danych\Zadanie 2\BD2\data";
+        static string _path = @"C:\Users\jasiek\Desktop\Bazy_Danych\Zadanie_2\good\BD2\test";
         private IObjectContainer db;
-        public ElementRepository()
+        public PersonRepository()
         {
             var config = Db4oEmbedded.NewConfiguration();
             config.Common.ActivationDepth = 3;
@@ -176,21 +176,23 @@ namespace BD2.Repository
 
         public bool CheckChildParents(Person person, Child child)
         {
+            bool istrue = true;
             if (!string.IsNullOrEmpty(child.child.Mother))
             {
                 if (person.Gender == Gender.Kobieta.ToString())
                     return false;
                 else
-                    return true;
+                    istrue = true;
             }
-            else if (!string.IsNullOrEmpty(child.child.Father))
+
+            if (!string.IsNullOrEmpty(child.child.Father))
             {
                 if (person.Gender == Gender.Mezczyzna.ToString())
                     return false;
                 else
-                    return true;
+                    istrue = true;
             }
-            return true;
+            return istrue;
         }
 
         public bool CheckCycles(Person person, Child child)

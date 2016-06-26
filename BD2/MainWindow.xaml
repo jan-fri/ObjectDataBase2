@@ -257,7 +257,7 @@
                        Grid.Column="1"
                        HorizontalAlignment="Left"
                        VerticalAlignment="Top"
-                       Text="{Binding CountList,
+                       Text="{Binding CountPerson,
                                       Mode=OneWay,
                                       UpdateSourceTrigger=PropertyChanged}" />
             <TextBlock Grid.Row="1"
@@ -270,7 +270,7 @@
                        Grid.Column="1"
                        HorizontalAlignment="Left"
                        VerticalAlignment="Top"
-                       Text="{Binding CountElement,
+                       Text="{Binding CountChild,
                                       Mode=OneWay,
                                       UpdateSourceTrigger=PropertyChanged}" />
 

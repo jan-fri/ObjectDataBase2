@@ -15,9 +15,9 @@ namespace BD2.ViewModels
     [ImplementPropertyChanged]
     public class MainWindowViewModel
     {
-        ElementRepository db = new ElementRepository();
-        public int CountList { get; set; }
-        public int CountElement { get; set; }
+        PersonRepository db = new PersonRepository();
+        public int CountPerson { get; set; }
+        public int CountChild { get; set; }
         public ICommand AddPersonCommand { get; set; }
         public ICommand DeletePersonCommand { get; set; }
         public ICommand EditPersonCommand { get; set; }
@@ -217,21 +217,21 @@ namespace BD2.ViewModels
         {
             ListsOfPersons = new ObservableRangeCollection<Person>();
             AddPersonCommand = new RelayCommand(AddPerson);
-            DeletePersonCommand = new RelayCommand(DeletePerson, CanExecuteList);
-            EditPersonCommand = new RelayCommand(EditPerson, CanExecuteList);
-            AddChildCommand = new RelayCommand(AddChild, CanExecuteList);
-            DeleteChildCommand = new RelayCommand(DeleteChild, CanExecuteElement);
+            DeletePersonCommand = new RelayCommand(DeletePerson, CanExecutePerson);
+            EditPersonCommand = new RelayCommand(EditPerson, CanExecutePerson);
+            AddChildCommand = new RelayCommand(AddChild, CanExecutePerson);
+            DeleteChildCommand = new RelayCommand(DeleteChild, CanExecuteChild);
             Refresh();
         }
 
-        private bool CanExecuteElement(object obj)
+        private bool CanExecuteChild(object obj)
         {
             if (SelectedChild == null)
                 return false;
             return true;
         }
 
-        private bool CanExecuteList(object obj)
+        private bool CanExecutePerson(object obj)
         {
             if (SelectedPerson == null)
                 return false;
@@ -247,8 +247,8 @@ namespace BD2.ViewModels
 
         private void Refresh()
         {
-            CountList = db.GetPerson<Person>().Count;
-            CountElement = db.GetPerson<Child>().Count;
+            CountPerson = db.GetPerson<Person>().Count;
+            CountChild = db.GetPerson<Child>().Count;
             string name = SelectedChild?.child.Name;
             string listName = SelectedPerson?.Name;
             Clear();
@@ -312,6 +312,24 @@ namespace BD2.ViewModels
                 viewmodel.BirthDate = birthDate.ToString("d");
                 viewmodel.DeathDate = deathDate.ToString("d");
                 var gender = viewmodel.Gender.ToString();
+
+                if (SelectedPerson.Children.Any())
+                {
+                    Person newPerson = new Person
+                    {
+                        BirthDate = birthDate.ToString("d"),
+                        DeathDate = deathDate.ToString("d"),
+                        Gender = gender
+                    };
+
+                    foreach (var child in SelectedPerson.Children)
+                    {
+                        if (!CheckIfValid(newPerson, child, false))
+                        {
+                            return;
+                        } 
+                    }
+                }
                 var result = db.EditPerson(SelectedPerson, viewmodel.Name, viewmodel.BirthDate, viewmodel.DeathDate, gender);
                 if (result == false)
                 {
@@ -359,63 +377,74 @@ namespace BD2.ViewModels
             {
                 newChild.child = viewModel.SelectedPerson;
                 newChild.Count = Convert.ToDecimal(viewModel.Count);
+
+                if (CheckIfValid(SelectedPerson, newChild))
+                {
+                    var res = db.AddChild(SelectedPerson, newChild);
+                    if (res == false)
+                    {
+                        MessageBox.Show("Wystąpił błąd przy dodawaniu!");
+                    }
+                    Refresh();
+                }
+            }
+        }
+        
+        private bool CheckIfValid(Person SelectedPerson, Child newChild, bool addNewChild=true)
+        {
+            if (addNewChild)
+            {
                 if (!db.CheckIfChildExists(SelectedPerson, newChild))
                 {
                     MessageBox.Show("Takie dziecko juz istnieje");
-                    return;
+                    return false;
                 }
 
                 if (db.CheckCycles(SelectedPerson, newChild))
                 {
                     MessageBox.Show("Nie jest możliwe dodanie dziecka. (dziecko jest rodzicem?)");
-                    return;
+                    return false;
                 }
 
                 if (!db.CheckChildParents(SelectedPerson, newChild))
                 {
                     MessageBox.Show("Dziecko ma juz rodzica o danej plci");
-                    return;
-                }
-
-                if (SelectedPerson.Gender == Gender.Kobieta.ToString())
-                {
-                    if (!db.CheckParentAge(SelectedPerson, newChild, Gender.Kobieta))
-                    {
-                        MessageBox.Show("Wiek matki powinien być między 10 a 60 lat w momencie urodzenia dziecka");
-                        return;
-                    }
-
-                    if (!db.CheckIfPossibleToBeBorn(SelectedPerson, newChild, Gender.Kobieta))
-                    {
-                        MessageBox.Show("Dziecko nie urodziło się za życia matki");
-                        return;
-                    }
-
-                }
-
-                if (SelectedPerson.Gender == Gender.Mezczyzna.ToString())
-                {
-                    if (!db.CheckParentAge(SelectedPerson, newChild, Gender.Mezczyzna))
-                    {
-                        MessageBox.Show("Wiek ojca powinien być między 12 a 70 lat w momencie urodzenia dziecka");
-                        return;
-                    }
-
-                    if (!db.CheckIfPossibleToBeBorn(SelectedPerson, newChild, Gender.Mezczyzna))
-                    {
-                        MessageBox.Show("Dziecko urodziło się więcej niż 270 dni przed śmiercią ojca");
-                        return;
-                    }
-
-                }
-
-                var res = db.AddChild(SelectedPerson, newChild);
-                if (res == false)
-                {
-                    MessageBox.Show("Wystąpił błąd przy dodawaniu!");
-                }
-                Refresh();
+                    return false;
+                } 
             }
+
+            if (SelectedPerson.Gender == Gender.Kobieta.ToString())
+            {
+                if (!db.CheckParentAge(SelectedPerson, newChild, Gender.Kobieta))
+                {
+                    MessageBox.Show("Wiek matki powinien być między 10 a 60 lat w momencie urodzenia dziecka");
+                    return false;
+                }
+
+                if (!db.CheckIfPossibleToBeBorn(SelectedPerson, newChild, Gender.Kobieta))
+                {
+                    MessageBox.Show("Dziecko nie urodziło się za życia matki");
+                    return false;
+                }
+
+            }
+
+            if (SelectedPerson.Gender == Gender.Mezczyzna.ToString())
+            {
+                if (!db.CheckParentAge(SelectedPerson, newChild, Gender.Mezczyzna))
+                {
+                    MessageBox.Show("Wiek ojca powinien być między 12 a 70 lat w momencie urodzenia dziecka");
+                    return false;
+                }
+
+                if (!db.CheckIfPossibleToBeBorn(SelectedPerson, newChild, Gender.Mezczyzna))
+                {
+                    MessageBox.Show("Dziecko urodziło się więcej niż 270 dni przed śmiercią ojca");
+                    return false;
+                }
+
+            }
+            return true;
         }
 
         private TreeViewItem CreateTree(Child element, decimal count, bool root = false)
